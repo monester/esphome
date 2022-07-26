@@ -4,6 +4,7 @@
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "ble_client.h"
 
+#define MYBADCODE
 #ifdef MYBADCODE
 BADDDDDD CODE
 
