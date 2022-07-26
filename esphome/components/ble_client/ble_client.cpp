@@ -93,7 +93,7 @@ void BLEClient::connect() {
   }
 }
 
-char* get_gattc_string(esp_gattc_cb_event_t event) {
+const static char* get_gattc_string(esp_gattc_cb_event_t event) {
   switch(event) {
     case 0: return "ESP_GATTC_REG_EVT";               /*!< When GATT client is registered, the event comes */
     case 1: return "ESP_GATTC_UNREG_EVT";             /*!< When GATT client is unregistered, the event comes */
@@ -150,10 +150,10 @@ void BLEClient::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t es
     return;
   if (event != ESP_GATTC_REG_EVT && esp_gattc_if != ESP_GATT_IF_NONE && esp_gattc_if != this->gattc_if)
     return;
-
-  ESP_LOGW(TAG, ":: 1 :: Warning  gattc_event_handler esp_gattc_cb_event_t = %d", event);
-  ESP_LOGD(TAG, ":: 2 :: Debug    gattc_event_handler esp_gattc_cb_event_t = %d", event);
-  ESP_LOGI(TAG, ":: 3 :: Info     gattc_event_handler esp_gattc_cb_event_t = %d", event);
+//
+//  ESP_LOGW(TAG, ":: 1 :: Warning  gattc_event_handler esp_gattc_cb_event_t = %d", event);
+//  ESP_LOGD(TAG, ":: 2 :: Debug    gattc_event_handler esp_gattc_cb_event_t = %d", event);
+//  ESP_LOGI(TAG, ":: 3 :: Info     gattc_event_handler esp_gattc_cb_event_t = %d", event);
 
   bool all_established = this->all_nodes_established_();
 
@@ -267,42 +267,26 @@ void BLEClient::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t es
   }
 }
 
-char* get_gap_event_type_string(esp_gap_ble_cb_event_t event) {
+const static char* get_gap_event_type_string(esp_gap_ble_cb_event_t event) {
   switch (event) {
 #if (BLE_42_FEATURE_SUPPORT == TRUE)
-    case 0: //ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
-      return "ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT";
-    case 1: //ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
-      return "ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT";
-    case 2: //ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT:
-      return "ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT";
-    case 3: //ESP_GAP_BLE_SCAN_RESULT_EVT:
-      return "ESP_GAP_BLE_SCAN_RESULT_EVT";
-    case 4: //ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
-      return "ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT";
-    case 5: //ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
-      return "ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT";
-    case 6: //ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
-      return "ESP_GAP_BLE_ADV_START_COMPLETE_EVT";
-    case 7: //ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:
-      return "ESP_GAP_BLE_SCAN_START_COMPLETE_EVT";
+    case 0: return "ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT";
+    case 1: return "ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT";
+    case 2: return "ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT";
+    case 3: return "ESP_GAP_BLE_SCAN_RESULT_EVT";
+    case 4: return "ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT";
+    case 5: return "ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT";
+    case 6: return "ESP_GAP_BLE_ADV_START_COMPLETE_EVT";
+    case 7: return "ESP_GAP_BLE_SCAN_START_COMPLETE_EVT";
 #endif  // #if (BLE_42_FEATURE_SUPPORT == TRUE)
-    case 8: //ESP_GAP_BLE_AUTH_CMPL_EVT:
-      return "ESP_GAP_BLE_AUTH_CMPL_EVT";
-    case 9: //ESP_GAP_BLE_KEY_EVT:
-      return "ESP_GAP_BLE_KEY_EVT";
-    case 10: //ESP_GAP_BLE_SEC_REQ_EVT:
-      return "ESP_GAP_BLE_SEC_REQ_EVT";
-    case 11: //ESP_GAP_BLE_PASSKEY_NOTIF_EVT:
-      return "ESP_GAP_BLE_PASSKEY_NOTIF_EVT";
-    case 12: //ESP_GAP_BLE_PASSKEY_REQ_EVT:
-      return "ESP_GAP_BLE_PASSKEY_REQ_EVT";
-    case 13: //ESP_GAP_BLE_OOB_REQ_EVT:
-      return "ESP_GAP_BLE_OOB_REQ_EVT";
-    case 14: //ESP_GAP_BLE_LOCAL_IR_EVT:
-      return "ESP_GAP_BLE_LOCAL_IR_EVT";
-    case 15: //ESP_GAP_BLE_LOCAL_ER_EVT:
-      return "ESP_GAP_BLE_LOCAL_ER_EVT";
+    case 8: return "ESP_GAP_BLE_AUTH_CMPL_EVT";
+    case 9: return "ESP_GAP_BLE_KEY_EVT";
+    case 10: return "ESP_GAP_BLE_SEC_REQ_EVT";
+    case 11: return "ESP_GAP_BLE_PASSKEY_NOTIF_EVT";
+    case 12: return "ESP_GAP_BLE_PASSKEY_REQ_EVT";
+    case 13: return "ESP_GAP_BLE_OOB_REQ_EVT";
+    case 14: return "ESP_GAP_BLE_LOCAL_IR_EVT";
+    case 15: return "ESP_GAP_BLE_LOCAL_ER_EVT";
     case 16: //ESP_GAP_BLE_NC_REQ_EVT:
       return "ESP_GAP_BLE_NC_REQ_EVT";
 #if (BLE_42_FEATURE_SUPPORT == TRUE)
