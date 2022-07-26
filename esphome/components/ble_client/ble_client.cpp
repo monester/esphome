@@ -6,12 +6,12 @@
 
 #define MYBADCODE
 #ifdef MYBADCODE
-BADDDDDD CODE
 
 #endif
 
 
 #ifdef USE_ESP32
+BADDDDDD CODE
 
 namespace esphome {
 namespace ble_client {
