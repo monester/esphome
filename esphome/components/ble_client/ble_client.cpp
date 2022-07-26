@@ -217,6 +217,7 @@ void BLEClient::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_p
     case ESP_GAP_BLE_SEC_REQ_EVT:
       ESP_LOGV(TAG, "ESP_GAP_BLE_SEC_REQ_EVT %x", event);
       esp_ble_gap_security_rsp(param->ble_security.ble_req.bd_addr, true);
+      esp_ble_passkey_reply(param->ble_security.ble_req.bd_addr, true, 123456);
       break;
     // This event is sent once authentication has completed
     case ESP_GAP_BLE_AUTH_CMPL_EVT:
