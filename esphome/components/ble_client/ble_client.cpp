@@ -93,12 +93,67 @@ void BLEClient::connect() {
   }
 }
 
+char* get_gattc_string(esp_gattc_cb_event_t event) {
+  switch(event) {
+    case 0: return "ESP_GATTC_REG_EVT";               /*!< When GATT client is registered, the event comes */
+    case 1: return "ESP_GATTC_UNREG_EVT";             /*!< When GATT client is unregistered, the event comes */
+    case 2: return "ESP_GATTC_OPEN_EVT";              /*!< When GATT virtual connection is set up, the event comes */
+    case 3: return "ESP_GATTC_READ_CHAR_EVT";         /*!< When GATT characteristic is read, the event comes */
+    case 4: return "ESP_GATTC_WRITE_CHAR_EVT";        /*!< When GATT characteristic write operation completes, the event comes */
+    case 5: return "ESP_GATTC_CLOSE_EVT";             /*!< When GATT virtual connection is closed, the event comes */
+    case 6: return "ESP_GATTC_SEARCH_CMPL_EVT";       /*!< When GATT service discovery is completed, the event comes */
+    case 7: return "ESP_GATTC_SEARCH_RES_EVT";        /*!< When GATT service discovery result is got, the event comes */
+    case 8: return "ESP_GATTC_READ_DESCR_EVT";        /*!< When GATT characteristic descriptor read completes, the event comes */
+    case 9: return "ESP_GATTC_WRITE_DESCR_EVT";       /*!< When GATT characteristic descriptor write completes, the event comes */
+    case 10: return "ESP_GATTC_NOTIFY_EVT";           /*!< When GATT notification or indication arrives, the event comes */
+    case 11: return "ESP_GATTC_PREP_WRITE_EVT";       /*!< When GATT prepare-write operation completes, the event comes */
+    case 12: return "ESP_GATTC_EXEC_EVT";             /*!< When write execution completes, the event comes */
+    case 13: return "ESP_GATTC_ACL_EVT";              /*!< When ACL connection is up, the event comes */
+    case 14: return "ESP_GATTC_CANCEL_OPEN_EVT";      /*!< When GATT client ongoing connection is cancelled, the event comes */
+    case 15: return "ESP_GATTC_SRVC_CHG_EVT";         /*!< When "service changed" occurs, the event comes */
+    case 17: return "ESP_GATTC_ENC_CMPL_CB_EVT";      /*!< When encryption procedure completes, the event comes */
+    case 18: return "ESP_GATTC_CFG_MTU_EVT";          /*!< When configuration of MTU completes, the event comes */
+    case 19: return "ESP_GATTC_ADV_DATA_EVT";         /*!< When advertising of data, the event comes */
+    case 20: return "ESP_GATTC_MULT_ADV_ENB_EVT";     /*!< When multi-advertising is enabled, the event comes */
+    case 21: return "ESP_GATTC_MULT_ADV_UPD_EVT";     /*!< When multi-advertising parameters are updated, the event comes */
+    case 22: return "ESP_GATTC_MULT_ADV_DATA_EVT";    /*!< When multi-advertising data arrives, the event comes */
+    case 23: return "ESP_GATTC_MULT_ADV_DIS_EVT";     /*!< When multi-advertising is disabled, the event comes */
+    case 24: return "ESP_GATTC_CONGEST_EVT";          /*!< When GATT connection congestion comes, the event comes */
+    case 25: return "ESP_GATTC_BTH_SCAN_ENB_EVT";     /*!< When batch scan is enabled, the event comes */
+    case 26: return "ESP_GATTC_BTH_SCAN_CFG_EVT";     /*!< When batch scan storage is configured, the event comes */
+    case 27: return "ESP_GATTC_BTH_SCAN_RD_EVT";      /*!< When Batch scan read event is reported, the event comes */
+    case 28: return "ESP_GATTC_BTH_SCAN_THR_EVT";     /*!< When Batch scan threshold is set, the event comes */
+    case 29: return "ESP_GATTC_BTH_SCAN_PARAM_EVT";   /*!< When Batch scan parameters are set, the event comes */
+    case 30: return "ESP_GATTC_BTH_SCAN_DIS_EVT";     /*!< When Batch scan is disabled, the event comes */
+    case 31: return "ESP_GATTC_SCAN_FLT_CFG_EVT";     /*!< When Scan filter configuration completes, the event comes */
+    case 32: return "ESP_GATTC_SCAN_FLT_PARAM_EVT";   /*!< When Scan filter parameters are set, the event comes */
+    case 33: return "ESP_GATTC_SCAN_FLT_STATUS_EVT";  /*!< When Scan filter status is reported, the event comes */
+    case 34: return "ESP_GATTC_ADV_VSC_EVT";          /*!< When advertising vendor spec content event is reported, the event comes */
+    case 38: return "ESP_GATTC_REG_FOR_NOTIFY_EVT";   /*!< When register for notification of a service completes, the event comes */
+    case 39: return "ESP_GATTC_UNREG_FOR_NOTIFY_EVT"; /*!< When unregister for notification of a service completes, the event comes */
+    case 40: return "ESP_GATTC_CONNECT_EVT";          /*!< When the ble physical connection is set up, the event comes */
+    case 41: return "ESP_GATTC_DISCONNECT_EVT";       /*!< When the ble physical connection disconnected, the event comes */
+    case 42: return "ESP_GATTC_READ_MULTIPLE_EVT";    /*!< When the ble characteristic or descriptor multiple complete, the event comes */
+    case 43: return "ESP_GATTC_QUEUE_FULL_EVT";       /*!< When the gattc command queue full, the event comes */
+    case 44: return "ESP_GATTC_SET_ASSOC_EVT";        /*!< When the ble gattc set the associated address complete, the event comes */
+    case 45: return "ESP_GATTC_GET_ADDR_LIST_EVT";    /*!< When the ble get gattc address list in cache finish, the event comes */
+    case 46: return "ESP_GATTC_DIS_SRVC_CMPL_EVT";    /*!< When the ble discover service complete, the event comes */
+    default: return "UNKNOWN GATTC EVENT";
+  }
+}
+
 void BLEClient::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t esp_gattc_if,
                                     esp_ble_gattc_cb_param_t *param) {
+  ESP_LOGI(TAG, "GOT EVENT %s", get_gattc_string(event));
+
   if (event == ESP_GATTC_REG_EVT && this->app_id != param->reg.app_id)
     return;
   if (event != ESP_GATTC_REG_EVT && esp_gattc_if != ESP_GATT_IF_NONE && esp_gattc_if != this->gattc_if)
     return;
+
+  ESP_LOGW(TAG, ":: 1 :: Warning  gattc_event_handler esp_gattc_cb_event_t = %d", event);
+  ESP_LOGD(TAG, ":: 2 :: Debug    gattc_event_handler esp_gattc_cb_event_t = %d", event);
+  ESP_LOGI(TAG, ":: 3 :: Info     gattc_event_handler esp_gattc_cb_event_t = %d", event);
 
   bool all_established = this->all_nodes_established_();
 
@@ -212,7 +267,153 @@ void BLEClient::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t es
   }
 }
 
+char* get_gap_event_type_string(esp_gap_ble_cb_event_t event) {
+  switch (event) {
+#if (BLE_42_FEATURE_SUPPORT == TRUE)
+    case 0: //ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT";
+    case 1: //ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT";
+    case 2: //ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT";
+    case 3: //ESP_GAP_BLE_SCAN_RESULT_EVT:
+      return "ESP_GAP_BLE_SCAN_RESULT_EVT";
+    case 4: //ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT";
+    case 5: //ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT";
+    case 6: //ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
+      return "ESP_GAP_BLE_ADV_START_COMPLETE_EVT";
+    case 7: //ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SCAN_START_COMPLETE_EVT";
+#endif  // #if (BLE_42_FEATURE_SUPPORT == TRUE)
+    case 8: //ESP_GAP_BLE_AUTH_CMPL_EVT:
+      return "ESP_GAP_BLE_AUTH_CMPL_EVT";
+    case 9: //ESP_GAP_BLE_KEY_EVT:
+      return "ESP_GAP_BLE_KEY_EVT";
+    case 10: //ESP_GAP_BLE_SEC_REQ_EVT:
+      return "ESP_GAP_BLE_SEC_REQ_EVT";
+    case 11: //ESP_GAP_BLE_PASSKEY_NOTIF_EVT:
+      return "ESP_GAP_BLE_PASSKEY_NOTIF_EVT";
+    case 12: //ESP_GAP_BLE_PASSKEY_REQ_EVT:
+      return "ESP_GAP_BLE_PASSKEY_REQ_EVT";
+    case 13: //ESP_GAP_BLE_OOB_REQ_EVT:
+      return "ESP_GAP_BLE_OOB_REQ_EVT";
+    case 14: //ESP_GAP_BLE_LOCAL_IR_EVT:
+      return "ESP_GAP_BLE_LOCAL_IR_EVT";
+    case 15: //ESP_GAP_BLE_LOCAL_ER_EVT:
+      return "ESP_GAP_BLE_LOCAL_ER_EVT";
+    case 16: //ESP_GAP_BLE_NC_REQ_EVT:
+      return "ESP_GAP_BLE_NC_REQ_EVT";
+#if (BLE_42_FEATURE_SUPPORT == TRUE)
+    case 17: //ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT:
+      return "ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT";
+    case 18: //ESP_GAP_BLE_SCAN_STOP_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SCAN_STOP_COMPLETE_EVT";
+#endif  // #if (BLE_42_FEATURE_SUPPORT == TRUE)
+    case 19: //ESP_GAP_BLE_SET_STATIC_RAND_ADDR_EVT:
+      return "ESP_GAP_BLE_SET_STATIC_RAND_ADDR_EVT";
+    case 20: //ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT:
+      return "ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT";
+    case 21: //ESP_GAP_BLE_SET_PKT_LENGTH_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SET_PKT_LENGTH_COMPLETE_EVT";
+    case 22: //ESP_GAP_BLE_SET_LOCAL_PRIVACY_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SET_LOCAL_PRIVACY_COMPLETE_EVT";
+    case 23: //ESP_GAP_BLE_REMOVE_BOND_DEV_COMPLETE_EVT:
+      return "ESP_GAP_BLE_REMOVE_BOND_DEV_COMPLETE_EVT";
+    case 24: //ESP_GAP_BLE_CLEAR_BOND_DEV_COMPLETE_EVT:
+      return "ESP_GAP_BLE_CLEAR_BOND_DEV_COMPLETE_EVT";
+    case 25: //ESP_GAP_BLE_GET_BOND_DEV_COMPLETE_EVT:
+      return "ESP_GAP_BLE_GET_BOND_DEV_COMPLETE_EVT";
+    case 26: //ESP_GAP_BLE_READ_RSSI_COMPLETE_EVT:
+      return "ESP_GAP_BLE_READ_RSSI_COMPLETE_EVT";
+    case 27: //ESP_GAP_BLE_UPDATE_WHITELIST_COMPLETE_EVT:
+      return "ESP_GAP_BLE_UPDATE_WHITELIST_COMPLETE_EVT";
+#if (BLE_42_FEATURE_SUPPORT == TRUE)
+    case 28: //ESP_GAP_BLE_UPDATE_DUPLICATE_EXCEPTIONAL_LIST_COMPLETE_EVT:
+      return "ESP_GAP_BLE_UPDATE_DUPLICATE_EXCEPTIONAL_LIST_COMPLETE_EVT";
+#endif  // #if (BLE_42_FEATURE_SUPPORT == TRUE)
+    case 29: //ESP_GAP_BLE_SET_CHANNELS_EVT:
+      return "ESP_GAP_BLE_SET_CHANNELS_EVT";
+#if (BLE_50_FEATURE_SUPPORT == TRUE)
+    case 30: //ESP_GAP_BLE_READ_PHY_COMPLETE_EVT:
+      return "ESP_GAP_BLE_READ_PHY_COMPLETE_EVT";
+    case 31: //ESP_GAP_BLE_SET_PREFERRED_DEFAULT_PHY_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SET_PREFERRED_DEFAULT_PHY_COMPLETE_EVT";
+    case 32: //ESP_GAP_BLE_SET_PREFERRED_PHY_COMPLETE_EVT:
+      return "ESP_GAP_BLE_SET_PREFERRED_PHY_COMPLETE_EVT";
+    case 33: //ESP_GAP_BLE_EXT_ADV_SET_RAND_ADDR_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_ADV_SET_RAND_ADDR_COMPLETE_EVT";
+    case 34: //ESP_GAP_BLE_EXT_ADV_SET_PARAMS_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_ADV_SET_PARAMS_COMPLETE_EVT";
+    case 35: //ESP_GAP_BLE_EXT_ADV_DATA_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_ADV_DATA_SET_COMPLETE_EVT";
+    case 36: //ESP_GAP_BLE_EXT_SCAN_RSP_DATA_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_SCAN_RSP_DATA_SET_COMPLETE_EVT";
+    case 37: //ESP_GAP_BLE_EXT_ADV_START_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_ADV_START_COMPLETE_EVT";
+    case 38: //ESP_GAP_BLE_EXT_ADV_STOP_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_ADV_STOP_COMPLETE_EVT";
+    case 39: //ESP_GAP_BLE_EXT_ADV_SET_REMOVE_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_ADV_SET_REMOVE_COMPLETE_EVT";
+    case 40: //ESP_GAP_BLE_EXT_ADV_SET_CLEAR_COMPLETE_EVT:
+      return "ESP_GAP_BLE_EXT_ADV_SET_CLEAR_COMPLETE_EVT";
+    case 41: //ESP_GAP_BLE_PERIODIC_ADV_SET_PARAMS_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_SET_PARAMS_COMPLETE_EVT";
+    case 42: //ESP_GAP_BLE_PERIODIC_ADV_DATA_SET_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_DATA_SET_COMPLETE_EVT";
+    case 43: //ESP_GAP_BLE_PERIODIC_ADV_START_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_START_COMPLETE_EVT";
+    case 44: //ESP_GAP_BLE_PERIODIC_ADV_STOP_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_STOP_COMPLETE_EVT";
+    case 45: //ESP_GAP_BLE_PERIODIC_ADV_CREATE_SYNC_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_CREATE_SYNC_COMPLETE_EVT";
+    case 46: //ESP_GAP_BLE_PERIODIC_ADV_SYNC_CANCEL_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_SYNC_CANCEL_COMPLETE_EVT";
+    case 47: //ESP_GAP_BLE_PERIODIC_ADV_SYNC_TERMINATE_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_SYNC_TERMINATE_COMPLETE_EVT";
+    case 48: //ESP_GAP_BLE_PERIODIC_ADV_ADD_DEV_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_ADD_DEV_COMPLETE_EVT";
+    case 49: //ESP_GAP_BLE_PERIODIC_ADV_REMOVE_DEV_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_REMOVE_DEV_COMPLETE_EVT";
+    case 50: //ESP_GAP_BLE_PERIODIC_ADV_CLEAR_DEV_COMPLETE_EVT:
+      return "ESP_GAP_BLE_PERIODIC_ADV_CLEAR_DEV_COMPLETE_EVT";
+//    case ESP_GAP_BLE_SET_EXT_SCAN_PARAMS_COMPLETE_EVT:
+//      return "ESP_GAP_BLE_SET_EXT_SCAN_PARAMS_COMPLETE_EVT";
+//    case ESP_GAP_BLE_EXT_SCAN_START_COMPLETE_EVT:
+//      return "ESP_GAP_BLE_EXT_SCAN_START_COMPLETE_EVT";
+//    case ESP_GAP_BLE_EXT_SCAN_STOP_COMPLETE_EVT:
+//      return "ESP_GAP_BLE_EXT_SCAN_STOP_COMPLETE_EVT";
+//    case ESP_GAP_BLE_PREFER_EXT_CONN_PARAMS_SET_COMPLETE_EVT:
+//      return "ESP_GAP_BLE_PREFER_EXT_CONN_PARAMS_SET_COMPLETE_EVT";
+//    case ESP_GAP_BLE_PHY_UPDATE_COMPLETE_EVT:
+//      return "ESP_GAP_BLE_PHY_UPDATE_COMPLETE_EVT";
+//    case ESP_GAP_BLE_EXT_ADV_REPORT_EVT:
+//      return "ESP_GAP_BLE_EXT_ADV_REPORT_EVT";
+//    case ESP_GAP_BLE_SCAN_TIMEOUT_EVT:
+//      return "ESP_GAP_BLE_SCAN_TIMEOUT_EVT";
+//    case ESP_GAP_BLE_ADV_TERMINATED_EVT:
+//      return "ESP_GAP_BLE_ADV_TERMINATED_EVT";
+//    case ESP_GAP_BLE_SCAN_REQ_RECEIVED_EVT:
+//      return "ESP_GAP_BLE_SCAN_REQ_RECEIVED_EVT";
+//    case ESP_GAP_BLE_CHANNEL_SELECT_ALGORITHM_EVT:
+//      return "ESP_GAP_BLE_CHANNEL_SELECT_ALGORITHM_EVT";
+//    case ESP_GAP_BLE_PERIODIC_ADV_REPORT_EVT:
+//      return "ESP_GAP_BLE_PERIODIC_ADV_REPORT_EVT";
+//    case ESP_GAP_BLE_PERIODIC_ADV_SYNC_LOST_EVT:
+//      return "ESP_GAP_BLE_PERIODIC_ADV_SYNC_LOST_EVT";
+//    case ESP_GAP_BLE_PERIODIC_ADV_SYNC_ESTAB_EVT:
+//      return "ESP_GAP_BLE_PERIODIC_ADV_SYNC_ESTAB_EVT";
+#endif  // #if (BLE_50_FEATURE_SUPPORT == TRUE)
+    default:
+      return "event unknown";
+  };
+}
+
+
 void BLEClient::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
+  ESP_LOGI(TAG, "GOT EVENT %s", get_gap_event_type_string(event));
+
   switch (event) {
     // This event is sent by the server when it requests security
     case ESP_GAP_BLE_SEC_REQ_EVT:
@@ -227,7 +428,7 @@ void BLEClient::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_p
       if (!param->ble_security.auth_cmpl.success) {
         ESP_LOGE(TAG, "auth fail reason = 0x%x", param->ble_security.auth_cmpl.fail_reason);
       } else {
-        ESP_LOGV(TAG, "auth success. address type = %d auth mode = %d", param->ble_security.auth_cmpl.addr_type,
+        ESP_LOGI(TAG, "auth success. address type = %d auth mode = %d", param->ble_security.auth_cmpl.addr_type,
                  param->ble_security.auth_cmpl.auth_mode);
       }
       break;
@@ -236,6 +437,8 @@ void BLEClient::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_p
     default:
       break;
   }
+  for (auto *node : this->nodes_)
+    node->gap_event_handler(event, param);
 }
 
 // Parse GATT values into a float for a sensor.
