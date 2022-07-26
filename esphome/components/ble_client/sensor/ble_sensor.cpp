@@ -25,6 +25,8 @@ void BLESensor::dump_config() {
 
 void BLESensor::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                                     esp_ble_gattc_cb_param_t *param) {
+  ESP_LOGE(TAG, " BLESensor::gattc_event_handler\n");
+
   switch (event) {
     case ESP_GATTC_OPEN_EVT: {
       if (param->open.status == ESP_GATT_OK) {
@@ -74,6 +76,9 @@ void BLESensor::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t ga
       break;
     }
     case ESP_GATTC_READ_CHAR_EVT: {
+      ESP_LOGW(TAG, ":: 1 :: Warning [%s] ESP_GATTC_READ_CHAR_EVT (Received READ)", this->parent_->address_str().c_str());
+      ESP_LOGD(TAG, ":: 2 :: Debug   [%s] ESP_GATTC_READ_CHAR_EVT (Received READ)", this->parent_->address_str().c_str());
+      ESP_LOGI(TAG, ":: 3 :: Info    [%s] ESP_GATTC_READ_CHAR_EVT (Received READ)", this->parent_->address_str().c_str());
       if (param->read.conn_id != this->parent()->conn_id)
         break;
       if (param->read.status != ESP_GATT_OK) {
@@ -96,6 +101,27 @@ void BLESensor::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t ga
     }
     case ESP_GATTC_REG_FOR_NOTIFY_EVT: {
       this->node_state = espbt::ClientState::ESTABLISHED;
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+void BLESensor::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
+  switch (event) {
+    // This event is sent once authentication has completed
+    case ESP_GAP_BLE_AUTH_CMPL_EVT: {
+      if (param->ble_security.auth_cmpl.success) {
+        ESP_LOGW(TAG, "[%s] gap_event_handler success !!!!1111122222", this->parent_->address_str().c_str())
+      } else {
+        ESP_LOGW(TAG, "[%s] gap_event_handler failed !!!!1111122222", this->parent_->address_str().c_str())
+      }
+      break;
+    }
+    case ESP_GAP_BLE_PASSKEY_REQ_EVT: { /* passkey request event */
+      ESP_LOGE(TAG, "ESP_GAP_BLE_PASSKEY_REQ_EVT, onPassKeyRequest %x", event);
+      esp_ble_passkey_reply(param->ble_security.ble_req.bd_addr, true, 123456);
       break;
     }
     default:

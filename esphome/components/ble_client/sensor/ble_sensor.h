@@ -21,6 +21,7 @@ class BLESensor : public sensor::Sensor, public PollingComponent, public BLEClie
   void update() override;
   void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                            esp_ble_gattc_cb_param_t *param) override;
+  void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) override;
   void dump_config() override;
   float get_setup_priority() const override { return setup_priority::DATA; }
   void set_service_uuid16(uint16_t uuid) { this->service_uuid_ = espbt::ESPBTUUID::from_uint16(uuid); }
