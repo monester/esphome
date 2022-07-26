@@ -99,6 +99,10 @@ void BLEClient::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t es
   if (event != ESP_GATTC_REG_EVT && esp_gattc_if != ESP_GATT_IF_NONE && esp_gattc_if != this->gattc_if)
     return;
 
+  ESP_LOGW(TAG, ":: 1 :: Warning [] gattc_event_handler");
+  ESP_LOGD(TAG, ":: 2 :: Debug   [] gattc_event_handler");
+  ESP_LOGI(TAG, ":: 3 :: Info    [] gattc_event_handler");
+
   bool all_established = this->all_nodes_established_();
 
   switch (event) {
@@ -226,7 +230,7 @@ void BLEClient::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_p
       if (!param->ble_security.auth_cmpl.success) {
         ESP_LOGE(TAG, "auth fail reason = 0x%x", param->ble_security.auth_cmpl.fail_reason);
       } else {
-        ESP_LOGV(TAG, "auth success. address type = %d auth mode = %d", param->ble_security.auth_cmpl.addr_type,
+        ESP_LOGI(TAG, "auth success. address type = %d auth mode = %d", param->ble_security.auth_cmpl.addr_type,
                  param->ble_security.auth_cmpl.auth_mode);
       }
       break;
@@ -235,6 +239,8 @@ void BLEClient::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_p
     default:
       break;
   }
+  for (auto *node : this->nodes_)
+    node->gap_event_handler(event, param);
 }
 
 // Parse GATT values into a float for a sensor.
