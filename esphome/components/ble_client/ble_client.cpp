@@ -4,6 +4,12 @@
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "ble_client.h"
 
+#ifdef MYBADCODE
+BADDDDDD CODE
+
+#endif
+
+
 #ifdef USE_ESP32
 
 namespace esphome {
